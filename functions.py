@@ -1,4 +1,4 @@
-from User import User, Course, Folder
+from Classes import User, Course, Folder
 
 def start():
     while True:
