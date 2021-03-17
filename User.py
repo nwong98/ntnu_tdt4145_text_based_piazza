@@ -89,7 +89,6 @@ class Course(Database):
         WHERE course.id = '{self.id}'
         """)
         folders = self.fetchall()
-        print(folders)
         return [Folder(folder[0],folder[1], folder[2], folder[3]) for folder in folders]
 
 class Folder(Database):
@@ -113,28 +112,36 @@ class Folder(Database):
         SELECT 1
         """)
 
-    # def load_threads(self):
-    #     self.execute("""
-    #     SELECT 1
-    #     """)
+    def load_threads(self):
+        self.execute(f"""
+        SELECT thread.id, thread.folder_id, thread.user_id, thread.title, thread.tag, thread.created_at
+        FROM thread
+        INNER JOIN folder ON thread.folder_id = folder.id
+        WHERE thread.folder_id = '{self.id}'
+        """)
+        threads = self.fetchall()
+        return [Thread(thread[0],thread[1], thread[2], thread[3], thread[4], thread[5]) for thread in threads]
     
     def __str__(self):
         return f"Folder ID: {self.id} | Course ID: {self.course_id} | Folder Name: {self.title} | Parent Folder: {self.root_folder_id}"
 
-# class Thread(Database):
-#     def __init__(self, thread_id="", folder_id="", email="", title="", color_status='RED', created_at=""):
-#         self.thread_id = thread_id
-#         self.folder_id = folder_id
-#         self.email = email
-#         self.title = title
-#         self.color_status = color_status
-#         self.created_at = created_at
-#         Database.__init__(self)
+class Thread(Database):
+    def __init__(self, id=None, folder_id=None, user_id=None, title=None, tag=None, created_at=None):
+        self.id = id
+        self.folder_id = folder_id
+        self.user_id = user_id
+        self.title = title
+        self.tag = tag
+        self.created_at = created_at
+        Database.__init__(self)
     
-#     def load_posts(self) -> list[Post]:
-#         self.execute("""
-#         SELECT 1
-#         """)
+    def load_posts(self):
+        self.execute("""
+        SELECT 1
+        """)
+
+    def __str__(self):
+        return f"Thread ID: {self.id} | Folder ID: {self.folder_id} | User ID: {self.user_id} | Title: {self.title}"
 
 # class Post(Database):
 #     def __init__(self, post_id="", root_post="", folder_id="", email="", title="", body="", anonymous_post=0, created_at=""):

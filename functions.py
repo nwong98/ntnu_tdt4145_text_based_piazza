@@ -97,8 +97,8 @@ def folder_view(folder):
     while True:
         print(f' — — — — WELCOME {folder_title} — — — -')
         print(f'Your posts: ')
-        for post in folder.load_posts():
-            print(f"{post} \n")
+        for thread in folder.load_threads():
+            print(f"{thread} \n")
         print('--- WHAT TO DO NEXT ---')
 
 def thread_view(post):
