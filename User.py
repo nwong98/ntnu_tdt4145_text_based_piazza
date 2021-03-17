@@ -26,22 +26,22 @@ class User(Database):
         self.execute(f"""
         SELECT *
         FROM course
-        INNER JOIN participates_in_course ON course.course_id = participates_in_course.course_id
-        WHERE participates_in_course.email = '{self.email}'
+        INNER JOIN user_in_course ON course.id = user_in_course.course_id
+        WHERE user_in_course.user_id = '{self.email}'
         """)
         courses = self.fetchall()
         return [Course(course[0], course[1], course[2]) for course in courses]
     
-    def add_user_to_course(self, course_id):
-        self.execute(f"INSERT INTO `participates_in_course` VALUES ('{self.email}', {course_id})")
+    def add_user_to_course(self, course_id, user_type='Student'):
+        self.execute(f"INSERT INTO `user_in_course` VALUES ('{self.email}', {course_id}, '{user_type}')")
         self.commit()
 
     def add_user_to_viewed(self, thread_id):
-        self.execute(f"INSERT INTO `has_read` (`email`, `thread_id`) VALUES ('{self.email}', '{thread_id}')")
+        self.execute(f"INSERT INTO `user_has_read` (`user_id`, `thread_id`) VALUES ('{self.email}', '{thread_id}')")
         self.commit()
 
-    def add_user_to_liked(self, thread_id):
-        self.execute(f"INSERT INTO `user_likes_post` (`email`, `thread_id`) VALUES ('{self.email}', '{thread_id}')")
+    def add_user_to_liked(self, post_id):
+        self.execute(f"INSERT INTO `user_likes_post` (`user_id`, `post_id`) VALUES ('{self.email}', '{post_id}')")
         self.commit()
 
 class CourseAdmin(User):
@@ -49,63 +49,63 @@ class CourseAdmin(User):
         super().__init__(email, password, full_name)
 
     def create_course(self, course_name, term):
-        self.execute(f"INSERT INTO course (`course_name`, `term`) VALUES ('{course_name}', '{term}')")
+        self.execute(f"INSERT INTO course (`title`, `term`) VALUES ('{course_name}', '{term}')")
 
 
 class Course(Database):
-    def __init__(self, course_id=None, course_name=None, term=None):
-        self.course_id = course_id
-        self.course_name = course_name
-        self.course_term = term
+    def __init__(self, id=None, title=None, term=None):
+        self.id = id
+        self.title = title
+        self.term = term
         Database.__init__(self)
     
     def __str__(self):
-        return f"Course ID: {self.course_id} | Course Name: {self.course_name} | Course Term: {self.course_term}"
+        return f"Course ID: {self.id} | Course Name: {self.title} | Course Term: {self.term}"
     
     def load_course(self):
-        self.execute(f"SELECT * FROM course WHERE course.course_id = '{self.course_id}'")
+        self.execute(f"SELECT * FROM course WHERE course.id = '{self.id}'")
         course = self.fetchone()
-        self.course_name = course[1]
-        self.course_term = course[2]
+        self.title = course[1]
+        self.term = course[2]
         return course
 
     def create_course(self):
-        self.execute(f"INSERT INTO `course` (`course_name`,`term`) VALUES ('{self.course_name}', '{self.course_term}')")
+        self.execute(f"INSERT INTO `course` (`title`,`term`) VALUES ('{self.title}', '{self.term}')")
         self.execute(f"SELECT LAST_INSERT_ID()")
         course_id = self.fetchone()[0]
-        self.course_id = course_id
+        self.id = course_id
     
-    def create_folder(self, folder_name, root_folder=None):
-        if root_folder != None:
-            self.execute(f"INSERT INTO folder (course_id, folder_name, parent_folder) VALUES ('{self.course_id}', '{folder_name}', '{root_folder}')")
+    def create_folder(self, title, root_folder_id=None):
+        if root_folder_id != None:
+            self.execute(f"INSERT INTO folder (course_id, title, root_folder_id) VALUES ('{self.course_id}', '{title}', '{root_folder_id}')")
         else:
-            self.execute(f"INSERT INTO folder (course_id, folder_name) VALUES ('{self.course_id}', '{folder_name}')")
+            self.execute(f"INSERT INTO folder (course_id, title) VALUES ('{self.course_id}', '{title}')")
 
     def load_folders(self):
         self.execute(f"""
-        SELECT folder.folder_id, folder.folder_name, folder.course_id, folder.parent_folder
+        SELECT folder.id, folder.course_id, folder.root_folder_id, folder.title
         FROM folder
-        INNER JOIN course ON course.course_id = folder.course_id
-        WHERE course.course_id = '{self.course_id}'
+        INNER JOIN course ON course.id = folder.course_id
+        WHERE course.id = '{self.id}'
         """)
         folders = self.fetchall()
         print(folders)
-        return [Folder(folder_id = folder[0], folder_name = folder[1], course_id = folder[2], parent_folder = folder[3]) for folder in folders]
+        return [Folder(folder[0],folder[1], folder[2], folder[3]) for folder in folders]
 
 class Folder(Database):
-    def __init__(self, folder_id=None, folder_name=None, course_id=None, parent_folder=None):
-        self.folder_id = folder_id
+    def __init__(self, id=None, course_id=None, root_folder_id=None, title=None):
+        self.id = id
         self.course_id = course_id
-        self.folder_name = folder_name
-        self.parent_folder = parent_folder
+        self.root_folder_id = root_folder_id
+        self.title = title
         Database.__init__(self)
 
     def load_folder(self):
-        self.execute(f"SELECT * FROM folder WHERE folder.folder_id = '{self.folder_id}'")
+        self.execute(f"SELECT course_id, root_folder_id, title FROM folder WHERE folder.id = '{self.id}'")
         folder = self.fetchone()
-        self.course_id = folder[1]
-        self.folder_name = folder[2]
-        self.parent_folder = folder[3]
+        self.course_id = folder[0]
+        self.root_folder_id = folder[1]
+        self.title = folder[2]
         return folder
 
     def create_thread(self):
@@ -113,13 +113,13 @@ class Folder(Database):
         SELECT 1
         """)
 
-    def load_threads(self) -> list[Thread]:
-        self.execute("""
-        SELECT 1
-        """)
+    # def load_threads(self):
+    #     self.execute("""
+    #     SELECT 1
+    #     """)
     
     def __str__(self):
-        return f"Folder ID: {self.folder_id} | Course ID: {self.course_id} | Folder Name: {self.folder_name} | Parent Folder: {self.parent_folder}"
+        return f"Folder ID: {self.id} | Course ID: {self.course_id} | Folder Name: {self.title} | Parent Folder: {self.root_folder_id}"
 
 # class Thread(Database):
 #     def __init__(self, thread_id="", folder_id="", email="", title="", color_status='RED', created_at=""):

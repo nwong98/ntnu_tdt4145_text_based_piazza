@@ -8,9 +8,9 @@ def start():
             register_user()
         elif decision == '2':
             print(' — — — User Login — — — \n')
-            email = input('Enter email : ')
-            password = input('Enter password : ')
-            with User(email=email, password=password) as user:
+            user_email = input('Enter email : ')
+            user_password = input('Enter password : ')
+            with User(email=user_email, password=user_password) as user:
                 if user.validate_user() == True:
                     login_user(user)
                 else:
@@ -28,18 +28,18 @@ def main_menu():
 def register_user():
     while True:
         print(' — — — User Registration — — — ')
-        email = input('Enter email : ')
-        password = input('Enter password : ')
-        full_name = input('Enter full name : ')
-        with User(email, password, full_name) as newUser:
+        user_email = input('Enter email : ')
+        user_password = input('Enter password : ')
+        user_full_name = input('Enter full name : ')
+        with User(user_email, user_password, user_full_name) as newUser:
             newUser.create_user()
             print(' — — — User Registration: Success — — — \n')
             login_user(newUser)
 
 def login_user(user):
-    email, _, full_name, _ = user.load_user()
+    user_email, _, user_full_name = user.load_user()
     while True:
-        print(f' — — — — WELCOME {full_name} — — — -')
+        print(f' — — — — WELCOME {user_full_name} — — — -')
         print(f'Your courses: ')
         for course in user.load_courses():
             print(f"{course} \n")
@@ -51,26 +51,26 @@ def login_user(user):
         decision = input("Make a choice: ")
         if decision == '1':
             course_id = int(input("Course id of course: "))
-            with Course(course_id = course_id) as course:
+            with Course(id = course_id) as course:
                 course_view(course)
         elif decision == '2':
             course_id = int(input("Course id of course: "))
             user.add_user_to_course(course_id)
         elif decision == '3':
-            course_name = input("Name of course: ")
+            course_title = input("Name of course: ")
             course_term = input("Term of course: ")
-            with Course(course_name = course_name, term = course_term) as course:
+            with Course(title = course_title, term = course_term) as course:
                 course.create_course()
-            print(course.course_id)
-            user.add_user_to_course(course.course_id)
+            print(course.id)
+            user.add_user_to_course(course.id)
         elif decision == '4':
             break
 
 def course_view(course):
     course.load_course()
-    course_name = course.course_name
+    title = course.title
     while True:
-        print(f' — — — — WELCOME {course_name} — — — -')
+        print(f' — — — — WELCOME {title} — — — -')
         print(f'Your folders: ')
         for folder in course.load_folders():
             print(f"{folder} \n")
@@ -81,7 +81,7 @@ def course_view(course):
         decision = input("Make a choice: ")
         if decision == '1':
             folder_id = int(input("folder id of folder: "))
-            with Folder(folder_id = folder_id) as folder:
+            with Folder(id = folder_id) as folder:
                 folder_view(folder)
         elif decision == '2':
             pass
@@ -93,9 +93,9 @@ def search_post(course):
     
 def folder_view(folder):
     folder.load_folder()
-    folder_name = folder.folder_name
+    folder_title = folder.title
     while True:
-        print(f' — — — — WELCOME {folder_name} — — — -')
+        print(f' — — — — WELCOME {folder_title} — — — -')
         print(f'Your posts: ')
         for post in folder.load_posts():
             print(f"{post} \n")
@@ -105,4 +105,4 @@ def thread_view(post):
     pass
 
 def post_view(thread):
-
+    pass

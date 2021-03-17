@@ -6,7 +6,7 @@ drop_all = 'DROP DATABASE db'
 
 with Database() as connection:
     connection.execute_script('sql.txt')
-    
+
 start()
 
 with Database() as connection:
