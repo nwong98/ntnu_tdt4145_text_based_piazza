@@ -1,0 +1,31 @@
+-- eksempel usecase 1
+SELECT pass
+FROM db.user
+WHERE emaiL = 'nicolas@test.no';
+
+-- eksempel usecase 2
+INSERT INTO db.post(folder_id, email, title, content) VALUES (1, 'marcus@test.no', 'Student insert post', 'This is a really cool post!');
+
+-- eksempel usecase 3
+INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (12, 1, 'marcus@test.no', 'Student insert post', 'This is a really cool post!');
+-- inserter også i replies tabellen
+INSERT INTO db.replies(main_post, reply_post) VALUES (12, 13);
+
+-- eksempel usecase 4
+INSERT INTO db.post(folder_id, email, title, content) VALUES (1, 'kai@test.no', 'What is a WAL?', 'sd');
+INSERT INTO db.post(folder_id, email, content) VALUES (1, 'kai@test.no', 'A WAL is something?');
+
+SELECT post_id
+FROM db.post
+WHERE post.title LIKE '%WAL%' OR post.content LIKE '%WAL%';
+
+-- eksempel usecase 5
+-- count number of post creates for each user
+SELECT email, COUNT(post_id) AS post_count
+FROM db.post
+GROUP BY db.post.email;
+
+-- count number of reads for each user for all posts
+SELECT email, COUNT(email) AS read_count
+FROM db.has_read
+GROUP BY email;
