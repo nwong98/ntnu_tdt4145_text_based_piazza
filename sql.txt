@@ -4,117 +4,118 @@ CREATE TABLE db.user (
     email VARCHAR(128) NOT NULL,
     pass VARCHAR(128) NOT NULL,
     full_name VARCHAR(128) NOT NULL,
-    user_type VARCHAR(128) NOT NULL DEFAULT 'participant',
     PRIMARY KEY (email)
 );
 
 CREATE TABLE db.course (
-    course_id INT NOT NULL AUTO_INCREMENT,
-    course_name VARCHAR(128) NOT NULL,
+    id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(128) NOT NULL,
     term VARCHAR(128) NOT NULL,
-    PRIMARY KEY (course_id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE db.folder (
-    folder_id INTEGER NOT NULL AUTO_INCREMENT,
+    id INTEGER NOT NULL AUTO_INCREMENT,
     course_id INTEGER NOT NULL,
-    folder_name VARCHAR(128) DEFAULT 'No name',
-    parent_folder INTEGER,
-    PRIMARY KEY (folder_id),
+    root_folder_id INTEGER,
+    title VARCHAR(128) DEFAULT 'No name',
+    PRIMARY KEY (id),
     FOREIGN KEY (course_id)
         REFERENCES course (course_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    FOREIGN KEY (parent_folder)
+    FOREIGN KEY (root_folder_id)
         REFERENCES folder (folder_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
+
+CREATE TABLE db.thread (
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    folder_id INTEGER NOT NULL,
+    user_id VARCHAR(128) NOT NULL,
+    title VARCHAR(128) DEFAULT 'No title',
+    tag VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (folder_id)
+        REFERENCES folder (id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (user_id)
+        REFERENCES user (email)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
 
 CREATE TABLE db.post (
-    post_id INTEGER NOT NULL AUTO_INCREMENT,
-    parent_post INTEGER,
-    folder_id INTEGER NOT NULL,
-    email VARCHAR(128),
-    title VARCHAR(128) DEFAULT 'No title',
-    content TEXT,
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    tag VARCHAR(20),
+    id INTEGER NOT NULL AUTO_INCREMENT,
+    thread_id INTEGER NOT NULL,
+    root_post_id INTEGER,
+    user_id VARCHAR(128) NOT NULL,
+    body TEXT,
     anonymous_post INTEGER DEFAULT 0,
-    color_status VARCHAR(10) DEFAULT 'RED',
-    PRIMARY KEY (post_id),
-    FOREIGN KEY (email)
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (thread_id)
+        REFERENCES thread (id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (root_post_id)
+        REFERENCES post (id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (user_id)
         REFERENCES user (email)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    FOREIGN KEY (folder_id)
-        REFERENCES folder (folder_id)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    FOREIGN KEY (parent_post)
-        REFERENCES post (post_id)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
 );
 
-CREATE TABLE db.replies (
-    main_post INTEGER NOT NULL,
-    reply_post INTEGER NOT NULL,
-    PRIMARY KEY (main_post, reply_post),
-    FOREIGN KEY (main_post)
-        REFERENCES post (post_id)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    FOREIGN KEY (reply_post)
-        REFERENCES post (post_id)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-);
-
-CREATE TABLE db.participates_in_course (
-    email VARCHAR(500) NOT NULL,
+CREATE TABLE db.user_in_course (
+    user_id VARCHAR(500) NOT NULL,
     course_id INTEGER NOT NULL,
-    PRIMARY KEY (email , course_id),
-    FOREIGN KEY (email)
+    user_type VARCHAR (50) NOT NULL DEFAULT 'Student'
+    PRIMARY KEY (user_id , course_id),
+    FOREIGN KEY (user_id)
         REFERENCES user (email)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY (course_id)
-        REFERENCES course (course_id)
+        REFERENCES course (id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
 
 CREATE TABLE db.user_likes_post (
-	like_id INTEGER NOT NULL AUTO_INCREMENT,
-    email VARCHAR(500),
+	id INTEGER NOT NULL AUTO_INCREMENT,
     post_id INTEGER NOT NULL,
-    PRIMARY KEY (like_id),
-    FOREIGN KEY (email)
-        REFERENCES user (email)
-        ON UPDATE CASCADE
-        ON DELETE SET NULL, -- kan slette bruker, men fortsatt telle likes.
+    user_id VARCHAR(128),
+    PRIMARY KEY (id),
     FOREIGN KEY (post_id)
         REFERENCES post (post_id)
         ON UPDATE CASCADE
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (user_id)
+        REFERENCES user (email)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL -- kan slette bruker, men fortsatt telle likes.
 );
 
-CREATE TABLE db.has_read (
-    read_id INTEGER NOT NULL AUTO_INCREMENT,
-    email VARCHAR(500),
+CREATE TABLE db.user_read_post (
+    id INTEGER NOT NULL AUTO_INCREMENT,
     post_id INTEGER NOT NULL,
-    PRIMARY KEY (read_id),
-    FOREIGN KEY (email)
-        REFERENCES user (email)
-        ON UPDATE CASCADE ON DELETE SET NULL, -- kan slette bruker, men fortsatt telle visning.
+    user_id VARCHAR(128),
+    PRIMARY KEY (id),
     FOREIGN KEY (post_id)
         REFERENCES post (post_id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id)
+        REFERENCES user (email)
+        ON UPDATE CASCADE ON DELETE SET NULL -- kan slette bruker, men fortsatt telle visning.
 );
 
 -- insert users
-INSERT INTO db.user(email, pass, full_name, user_type) VALUES ('nicolas@test.no', 'pass', 'Nicolas', 'admin');
+INSERT INTO db.user(email, pass, full_name) VALUES ('nicolas@test.no', 'pass', 'Nicolas');
 INSERT INTO db.user(email, pass, full_name) VALUES ('marcus@test.no', 'pass', 'Marcus');
 INSERT INTO db.user(email, pass, full_name) VALUES ('kai@test.no', 'pass', 'Kai');
 INSERT INTO db.user(email, pass, full_name) VALUES ('borg@test.no', 'pass', 'Borg');
@@ -123,40 +124,35 @@ INSERT INTO db.user(email, pass, full_name) VALUES ('alex@test.no', 'pass', 'Ale
 INSERT INTO db.user(email, pass, full_name) VALUES ('serg@test.no', 'pass', 'Serv');
 
 -- insert test course
-INSERT INTO db.course VALUES (1, 'testcourse', 'høst2918');
-INSERT INTO db.course VALUES (2, 'newcourse', 'våren2021');
+INSERT INTO db.course (title, term) VALUES ('testcourse', 'høst2918');
+INSERT INTO db.course (title, term) VALUES ('newcourse', 'våren2021');
 
 -- insert test folder
-INSERT INTO db.folder(course_id, folder_name) VALUES (1, 'exam');
-INSERT INTO db.folder(course_id, folder_name) VALUES (1, 'tasks');
-INSERT INTO db.folder(course_id, folder_name) VALUES (1, 'øving');
-INSERT INTO db.folder(course_id, folder_name) VALUES (1, 'qa');
-INSERT INTO db.folder(course_id, folder_name, parent_folder) VALUES (1, 'exam2020', 1);
+INSERT INTO db.folder(course_id, title) VALUES (1, 'exam');
+INSERT INTO db.folder(course_id, title) VALUES (1, 'tasks');
+INSERT INTO db.folder(course_id, title) VALUES (2, 'øving');
+INSERT INTO db.folder(course_id, title) VALUES (2, 'qa');
+INSERT INTO db.folder(course_id, title, root_folder_id) VALUES (1, 'exam2020', 1);
 
--- insert test post
-INSERT INTO db.post(folder_id, email, title, content) VALUES (1,'nicolas@test.no', 'How to solve question 1?', 'I am not sure on this!');
-INSERT INTO db.post(folder_id, email, title, content) VALUES (2,'kai@test.no', 'How to solve question 2', 'This was easy!');
-INSERT INTO db.post(folder_id, email, title, content) VALUES (3,'kai@test.no', 'How to install Mysql?', 'This was hard!');
-INSERT INTO db.post(folder_id, email, title, content) VALUES (3,'kai@test.no', 'How to solve øving 2', 'This was cool!');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (1, 1,'alex@test.no', 'awef', 'wooow');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (1, 1,'serg@test.no', 'vrae', 'wooow');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (2, 2,'preben@test.no', 'erag', 'wooow');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (2, 2,'kai@test.no', 'erag', 'wooow');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (2, 2,'nicolas@test.no', 'erag', 'wooow');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (3, 3,'marcus@test.no', 'erag', 'wooow');
-INSERT INTO db.post(parent_post, folder_id, email, title, content) VALUES (3, 3,'preben@test.no', 'erag', 'wooow');
+-- insert threads
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (1, 1, 'Exam date?', 'question');
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (2, 2, 'What task?', 'question');
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (3, 3, 'When is due date', 'announcement');
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (4, 4, 'Some qa', 'lecture');
 
--- insert replies
-INSERT INTO db.replies(main_post, reply_post)
-SELECT parent_post AS main_post, post_id AS reply_post
-FROM db.post
-WHERE parent_post IS NOT NULL;
+-- insert posts
+INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 4, 'This is some dummy text.');
+INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 5, 'This is some dummy text.');
+INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 1, 'This is some dummy text.');
+INSERT INTO db.post (thread_id, user_id, body) VALUES (2, 2, 'This is some dummy text.');
+INSERT INTO db.post (thread_id, user_id, body) VALUES (2, 3, 'This is some dummy text.');
 
 -- insert participates_in_course
-INSERT INTO db.participates_in_course(email, course_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',1), ('preben@test.no',1), ('alex@test.no',1), ('serg@test.no',1);
+INSERT INTO db.user_in_course(user_id, course_id, user_type) VALUES ('nicolas@test.no',1, 'admin');
+INSERT INTO db.user_in_course(user_id, course_id) VALUES ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',1), ('preben@test.no',1), ('alex@test.no',1), ('serg@test.no',1);
 
 -- insert into user_likes_post
-INSERT INTO db.user_likes_post(email, post_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',2), ('preben@test.no',2), ('alex@test.no',3), ('serg@test.no',4), ('kai@test.no',7), ('borg@test.no',7);
+INSERT INTO db.user_likes_post(user_id, post_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',2), ('preben@test.no',2), ('alex@test.no',3), ('serg@test.no',4), ('kai@test.no',7), ('borg@test.no',7);
 
 -- insert into has_read
-INSERT INTO db.has_read(email, post_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',2), ('preben@test.no',2), ('alex@test.no',3), ('serg@test.no',4), ('kai@test.no',7), ('borg@test.no',7);
+INSERT INTO db.has_read(user_id, post_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',2), ('preben@test.no',2), ('alex@test.no',3), ('serg@test.no',4), ('kai@test.no',7), ('borg@test.no',7);
