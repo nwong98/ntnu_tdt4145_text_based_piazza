@@ -49,6 +49,17 @@ class User(Database):
         self.execute(
             f"INSERT INTO `user_likes_post` (`user_id`, `post_id`) VALUES ('{self.email}', '{post_id}')")
         self.commit()
+    
+    def is_admin(self, course):
+        self.execute(f"""
+        SELECT *
+        FROM user_in_course
+        WHERE user_in_course.user_id = '{self.email}' AND user_in_course.user_type = 'Admin'
+        """)
+        if self.fetchone() != None:
+            return True
+        else:
+            return False
 
 
 class CourseAdmin(User):
@@ -88,6 +99,7 @@ class Course(Database):
         else:
             self.execute(
                 f"INSERT INTO folder (course_id, title) VALUES ('{self.course_id}', '{title}')")
+        self.commit()
 
     def load_folders(self):
         self.execute(f"""
@@ -112,9 +124,10 @@ class Folder(Database):
                 f"SELECT course_id, root_folder_id, title FROM folder WHERE folder.id = '{self.id}'")
             self.course_id, self.root_folder_id, self.title = self.fetchone()
 
-    def create_thread(self):
+    def create_thread(self, user_id, thread_title, thread_tag):
         self.execute(
-            f"INSERT INTO `thread` (`folder_id`,`user_id`,`title`) VALUES ('{self.email}', '{self.password}', '{self.full_name}')")
+            f"INSERT INTO `thread` (`folder_id`,`user_id`,`title`, `tag`) VALUES ('{self.id}', '{user_id}', '{thread_title}', '{thread_tag}')")
+        self.commit()
 
     def load_threads(self):
         self.execute(f"""
@@ -144,6 +157,15 @@ class Thread(Database):
                 f"SELECT folder_id, user_id, title, tag, created_at FROM thread WHERE thread.id = '{self.id}'")
             self.folder_id, self.user_id, self.title, self.tag, self.created_at = self.fetchone()
 
+    def create_post(self, user_id, body, root_post_id=None, anonymous_post=0):
+        if root_post_id != None:
+            self.execute(
+                f"INSERT INTO `post` (`thread_id`,`root_post_id`,`user_id`, `body`, `anonymous_post`) VALUES ({self.id}, {root_post_id}, '{user_id}', '{body}', {anonymous_post})")
+        else:
+            self.execute(
+                f"INSERT INTO `post` (`thread_id`,`user_id`, `body`, `anonymous_post`) VALUES ({self.id}, '{user_id}', '{body}', {anonymous_post})")
+        self.commit()
+
     def load_posts(self):
         self.execute(f"""
         SELECT post.id, post.thread_id, post.root_post_id, post.user_id, post.body, post.anonymous_post, post.created_at
@@ -172,6 +194,7 @@ class Post(Database):
             self.execute(
                 f"SELECT thread_id, root_post_id, user_id, body, anonymous_post, created_at FROM post WHERE post.id = '{self.id}'")
             self.thread_id, self.root_post_id, self.user_id, self.body, self.anonymous_post, self.created_at = self.fetchone()
+        
 
     def __str__(self):
         return f"Post ID: {self.id} | Thread ID: {self.thread_id} | Root Post ID: {self.root_post_id} | User ID: {self.user_id} | Body: {self.body} | Anonymous Post: {self.anonymous_post} | Create Time: {self.created_at}"
