@@ -136,30 +136,26 @@ class Thread(Database):
         Database.__init__(self)
     
     def load_posts(self):
-        self.execute("""
-        SELECT 1
+        self.execute(f"""
+        SELECT post.id, post.thread_id, post.root_post_id, post.user_id, post.body, post.anonymous_post.post.created_at
+        FROM post
+        INNER JOIN thread ON post.thread_id = thread.id
+        WHERE post.thread_id = '{self.id}'
         """)
 
     def __str__(self):
         return f"Thread ID: {self.id} | Folder ID: {self.folder_id} | User ID: {self.user_id} | Title: {self.title}"
 
-# class Post(Database):
-#     def __init__(self, post_id="", root_post="", folder_id="", email="", title="", body="", anonymous_post=0, created_at=""):
-#         self.post_id = post_id
-#         self.parent_post = parent_post
-#         self.email = email
-#         self.title = title
-#         self.content = content
-#         self.create_time = None
-#         self.anonymous_post = anonymous_post
-#         Database.__init__(self)
+class Post(Database):
+    def __init__(self, id="", thread_id="", root_post_id="", user_id="", body="", anonymous_post=0, create_time=""):
+        self.id = id
+        self.thread_id = thread_id
+        self.root_post_id = root_post_id
+        self.user_id = user_id
+        self.body = body
+        self.anonymous_post = anonymous_post
+        self.create_time = None
+        Database.__init__(self)
     
-#     def create_posts(self):
-#         self.execute("""
-#         SELECT 1
-#         """)
-
-#     def load_posts(self):
-#         self.execute("""
-#         SELECT 1
-#         """)
+    def __str__(self):
+        pass

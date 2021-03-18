@@ -1,4 +1,4 @@
-from Classes import User, Course, Folder
+from Classes import User, Course, Folder, Thread
 
 def start():
     while True:
@@ -68,9 +68,9 @@ def login_user(user):
 
 def course_view(course):
     course.load_course()
-    title = course.title
+    course_title = course.title
     while True:
-        print(f' — — — — WELCOME {title} — — — -')
+        print(f' — — — — WELCOME {course_title} — — — -')
         print(f'Your folders: ')
         for folder in course.load_folders():
             print(f"{folder} \n")
@@ -100,9 +100,42 @@ def folder_view(folder):
         for thread in folder.load_threads():
             print(f"{thread} \n")
         print('--- WHAT TO DO NEXT ---')
+        print(' 1. Acces Thread (id)')
+        print(' 2. Create Thread (id)')
+        print(' 3. Previous page (id)')
+        decision = input("Make a choice: ")
+        if decision == '1':
+            thread_id = int(input("Thread id of thread: "))
+            with Thread(id = thread_id) as thread:
+                thread_view(thread)
+        elif decision == '2':
+            thread_id = int(input("Thread id of new thread"))
+            with Thread(id = thread_id) as thread:
+                create_thread()
+        elif decision == '3':
+            break
 
 def thread_view(post):
-    pass
-
-def post_view(thread):
-    pass
+    thread.load_thread()
+    thread_title = thread.title
+    while True:
+        print(f' — — — — WELCOME {thread_title} — — — -')
+        print(f'Your posts: ')
+        for post in thread.load_posts():
+            print(f"{post} \n")
+        print('--- WHAT TO DO NEXT ---')
+        print(' 1. Reply post (id)')
+        print(' 2. Create post (id)')
+        print(' 3. Previous page (id)')
+        decision = input("Make a choice: ")
+        if decision == '1':
+            post_id = int(input("Which post: "))
+            with Post(id = post_id) as post:
+                pass
+        elif decision == '2':
+            post_id = int(input("Post id of new post"))
+            with Post(id = post_id) as post:
+                # create_post()
+                pass
+        elif decision == '3':
+            break

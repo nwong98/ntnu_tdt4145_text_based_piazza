@@ -1,5 +1,5 @@
 from Connect import Database
-from User import User
+from Classes import User
 from functions import start
 
 drop_all = 'DROP DATABASE db'
