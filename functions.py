@@ -91,7 +91,8 @@ def course_view(course, user):
             with Folder(id=folder_id) as folder:
                 folder_view(folder, user)
         elif decision == '2':
-            # search_post()
+            text = input("What to search: ")
+            print(course.search_text(text))
             pass
         elif decision == '3' and user.is_admin(course):
             folder_title = input("Name of folder: ")
@@ -101,8 +102,6 @@ def course_view(course, user):
             break
 
 
-def search_post(course):
-    pass
 
 
 def folder_view(folder, user):

@@ -71,14 +71,13 @@ class User(Database):
             return False
 
 
-class CourseAdmin(User):
-    def __init__(self, email="", password="", full_name=""):
-        super().__init__(email, password, full_name)
+# class CourseAdmin(User):
+#     def __init__(self, email="", password="", full_name=""):
+#         super().__init__(email, password, full_name)
 
-    def create_course(self, course_name, term):
-        self.execute(
-            f"INSERT INTO course (`title`, `term`) VALUES ('{course_name}', '{term}')")
-
+#     def create_course(self, course_name, term):
+#         self.execute(
+#             f"INSERT INTO course (`title`, `term`) VALUES ('{course_name}', '{term}')")
 
 class Course(Database):
     def __init__(self, id=None, title=None, term=None):
@@ -120,6 +119,14 @@ class Course(Database):
         folders = self.fetchall()
         return [Folder(folder[0], folder[1], folder[2], folder[3]) for folder in folders]
 
+    def search_text(self, string):
+        self.execute(f"""
+        SELECT thread.title, post.body
+        FROM folder INNER JOIN thread ON folder.id = thread.folder_id
+        INNER JOIN post ON thread.id = post.thread_id
+        WHERE folder.course_id = '{self.id}' AND thread.title LIKE '%{string}%' OR post.body LIKE '%{string}%'
+        """)
+        return self.fetchall()
 
 class Folder(Database):
     def __init__(self, id=None, course_id=None, root_folder_id=None, title=None):
