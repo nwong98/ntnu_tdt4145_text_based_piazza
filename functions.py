@@ -51,12 +51,14 @@ def login_user(user):
         print(' 2. Register in course(course_id)')
         print(' 3. Create Course(course_name and course_term)')
         print(' 4. Previous page')
-        decision = input("Make a choice: ")
+        decision = input("Make a choice: \n")
         if decision == '1':
             course_id = int(input("Course id of course: "))
             with Course(id=course_id) as course:
                 course_view(course, user)
         elif decision == '2':
+            for course in user.load_all_courses():
+                print(f"{course} \n")
             course_id = int(input("Course id of course: "))
             user.add_user_to_course(course_id)
         elif decision == '3':

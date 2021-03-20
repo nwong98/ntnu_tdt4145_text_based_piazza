@@ -8,14 +8,15 @@ class User(Database):
         self.email = email
         self.password = password
         self.full_name = full_name
-        if self.email != None:
-            self.execute(
-                f"SELECT pass, full_name FROM user WHERE user.email = '{self.email}'")
-            self.password, self.full_name = self.fetchone()
+        # if self.email != None:
+        #     self.execute(
+        #         f"SELECT pass, full_name FROM user WHERE user.email = '{self.email}'")
+        #     self.password, self.full_name = self.fetchone()
 
     def create_user(self):
         self.execute(
             f"INSERT INTO `user` (`email`,`pass`,`full_name`) VALUES ('{self.email}', '{self.password}', '{self.full_name}')")
+        self.commit()
 
     def validate_user(self):
         self.execute(
@@ -31,6 +32,14 @@ class User(Database):
         FROM course
         INNER JOIN user_in_course ON course.id = user_in_course.course_id
         WHERE user_in_course.user_id = '{self.email}'
+        """)
+        courses = self.fetchall()
+        return [Course(course[0], course[1], course[2]) for course in courses]
+    
+    def load_all_courses(self):
+        self.execute(f"""
+        SELECT *
+        FROM course
         """)
         courses = self.fetchall()
         return [Course(course[0], course[1], course[2]) for course in courses]
