@@ -84,6 +84,7 @@ def course_view(course, user):
         if user.is_admin(course):
             print('--- ADMIN Panel ---')
             print('3. Create folder')
+            print('4. View Statistics')
         print(' Press "e" to go back')
         decision = input("Make a choice: ")
         if decision == '1':
@@ -98,10 +99,13 @@ def course_view(course, user):
             folder_title = input("Name of folder: ")
             root_folder = int(input("Root folder ID: "))
             course.create_folder(folder_title, root_folder)
+        elif decision == '4' and user.is_admin(course):
+            pass
         elif decision == 'e':
             break
 
-
+def load_course_stats(course):
+    pass
 
 
 def folder_view(folder, user):

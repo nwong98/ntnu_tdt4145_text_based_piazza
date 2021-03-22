@@ -70,15 +70,6 @@ class User(Database):
         else:
             return False
 
-
-# class CourseAdmin(User):
-#     def __init__(self, email="", password="", full_name=""):
-#         super().__init__(email, password, full_name)
-
-#     def create_course(self, course_name, term):
-#         self.execute(
-#             f"INSERT INTO course (`title`, `term`) VALUES ('{course_name}', '{term}')")
-
 class Course(Database):
     def __init__(self, id=None, title=None, term=None):
         super().__init__()
@@ -127,6 +118,53 @@ class Course(Database):
         WHERE folder.course_id = '{self.id}' AND thread.title LIKE '%{string}%' OR post.body LIKE '%{string}%'
         """)
         return self.fetchall()
+    
+    def load_total_posts(self):
+        self.execute(
+            f"""
+            SELECT COUNT(user_id)
+            FROM user_in_course
+            WHERE course_id='{self.id}'
+            """)
+        return self.fetchone()
+
+    def load_total_users(self):
+        self.execute(
+            f"""
+            SELECT COUNT(post.id)
+            FROM folder
+            JOIN thread on folder.id = thread.folder_id
+            JOIN post on thread.id = post.thread_id
+            WHERE folder.course_id = {self.id};
+            """)
+        return self.fetchone()
+
+    def load_total_threads(self):
+        self.execute(
+            f"""
+            SELECT COUNT(post.id)
+            FROM folder
+            JOIN thread on folder.id = thread.folder_id
+            JOIN post on thread.id = post.thread_id
+            WHERE folder.course_id = '{self.id}';
+            """)
+        return self.fetchone()
+
+    def load_total_threads(self):
+        self.execute(
+            f"""
+            SELECT  COUNT(thread.id)
+            FROM folder
+            JOIN thread on folder.id = thread.folder_id
+            WHERE course_id={self.id};
+            """)
+        return self.fetchone()
+
+    def load_total_instructor_responses(self):
+        pass
+
+    def load_total_student_responses(self):
+        pass
 
 class Folder(Database):
     def __init__(self, id=None, course_id=None, root_folder_id=None, title=None):
