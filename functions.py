@@ -1,5 +1,8 @@
-from Classes import User, Course, Folder, Thread, Post
-
+from classes.user import User
+from classes.course import Course
+from classes.folder import Folder
+from classes.thread import Thread
+from classes.post import Post
 
 def start():
     while True:
@@ -81,7 +84,7 @@ def course_view(course, user):
         print('--- WHAT TO DO NEXT ---')
         print(' 1. Acces Folder (id)')
         print(' 2. Search question (id)')
-        if user.is_admin(course):
+        if user.is_admin(course.id):
             print('--- ADMIN Panel ---')
             print('3. Create folder')
             print('4. View Statistics')
@@ -100,12 +103,15 @@ def course_view(course, user):
             root_folder = int(input("Root folder ID: "))
             course.create_folder(folder_title, root_folder)
         elif decision == '4' and user.is_admin(course):
-            pass
+            load_course_stats(course)
         elif decision == 'e':
             break
 
 def load_course_stats(course):
-    pass
+    print(course.load_total_users())
+    print(course.load_total_threads())
+    print(course.load_total_posts())
+    print(course.load_total_users())
 
 
 def folder_view(folder, user):
@@ -122,6 +128,7 @@ def folder_view(folder, user):
         if decision == '1':
             thread_id = int(input("Thread id of thread: "))
             with Thread(id=thread_id) as thread:
+                thread.read_thread(user.email)
                 thread_view(thread, user)
         elif decision == '2':
             thread_title = input("Title of new thread")
@@ -138,9 +145,10 @@ def thread_view(thread, user):
         for post in thread.load_posts():
             print(f"{post} \n")
         print('--- WHAT TO DO NEXT ---')
-        print(' 1. Reply post (id)')
-        print(' 2. Create post (id)')
-        print(' 3. Previous page (id)')
+        print(' 1. Reply post (id): ')
+        print(' 2. Create post (id): ')
+        print(' 3. Like post (post id): ')
+        print(' 4. Previous page (id)')
         decision = input("Make a choice: ")
         if decision == '1':
             root_post_id = int(input("Which post: "))
@@ -150,4 +158,13 @@ def thread_view(thread, user):
             post_body = input("What body: ")
             thread.create_post(user.email, post_body)
         elif decision == '3':
+            post_id = int(input("Post id of post: "))
+            with Post(id=post_id) as post:
+                try:
+                    post.likes_post(user.email)
+                    print("Post liked!")
+                except:
+                    print("You've already liked this post")
+
+        elif decision == '4':
             break

@@ -1,4 +1,4 @@
-from Connect import Database
+from classes.connect import Database
 from functions import start
 
 drop_all = 'DROP DATABASE db'

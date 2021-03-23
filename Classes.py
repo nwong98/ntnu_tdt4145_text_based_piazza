@@ -2,7 +2,11 @@ from Connect import Database
 
 
 class User(Database):
+    """Class for user with methods to insert and query data
 
+    Args:
+        Database (Class): Inherits from Database class handling the database connection
+    """
     def __init__(self, email=None, password=None, full_name=None):
         super().__init__()
         self.email = email
@@ -14,11 +18,17 @@ class User(Database):
         #     self.password, self.full_name = self.fetchone()
 
     def create_user(self):
+        """Method to insert user into database"""
         self.execute(
             f"INSERT INTO `user` (`email`,`pass`,`full_name`) VALUES ('{self.email}', '{self.password}', '{self.full_name}')")
         self.commit()
 
     def validate_user(self):
+        """Check if email and password matches any tuples in database
+
+        Returns:
+            Boolean: if user is in database
+        """
         self.execute(
             f"SELECT * FROM user WHERE user.email = '{self.email}' AND user.pass = '{self.password}'")
         if self.fetchone() != None:
@@ -27,6 +37,11 @@ class User(Database):
             return False
 
     def load_courses(self):
+        """Load courses user is in
+
+        Returns:
+            Course: return course objects
+        """
         self.execute(f"""
         SELECT *
         FROM course
@@ -37,6 +52,11 @@ class User(Database):
         return [Course(course[0], course[1], course[2]) for course in courses]
     
     def load_all_courses(self):
+        """Load all courses in database
+
+        Returns:
+            Course: return course objects
+        """
         self.execute(f"""
         SELECT *
         FROM course
@@ -45,25 +65,47 @@ class User(Database):
         return [Course(course[0], course[1], course[2]) for course in courses]
 
     def add_user_to_course(self, course_id, user_type='Student'):
+        """Add user to course
+
+        Args:
+            course_id (int): id of course user wants to be added to
+            user_type (str, optional): Define what type of user to be added. Defaults to 'Student'.
+        """
         self.execute(
             f"INSERT INTO `user_in_course` VALUES ('{self.email}', {course_id}, '{user_type}')")
         self.commit()
 
     def add_user_to_viewed(self, thread_id):
+        """Insert user to user_has_read table
+
+        Args:
+            thread_id (int): id of thread user has viewed
+        """
         self.execute(
             f"INSERT INTO `user_has_read` (`user_id`, `thread_id`) VALUES ('{self.email}', '{thread_id}')")
         self.commit()
 
     def add_user_to_liked(self, post_id):
+        """Insert user to user_likes post table
+
+        Args:
+            post_id (int): id of post user has liked
+        """
         self.execute(
             f"INSERT INTO `user_likes_post` (`user_id`, `post_id`) VALUES ('{self.email}', '{post_id}')")
         self.commit()
     
-    def is_admin(self, course):
+    def is_admin(self, course_id):
+        """Check if user id admin in course
+        Args:
+            course_id: id of course to check
+        Returns:
+            Boolean: return if user is admin in course
+        """
         self.execute(f"""
         SELECT *
         FROM user_in_course
-        WHERE user_in_course.user_id = '{self.email}' AND user_in_course.user_type = 'Admin'
+        WHERE user_in_course.user_id = '{self.email}' AND user_in_course.course_id = {course_id} AND user_in_course.user_type = 'Admin'
         """)
         if self.fetchone() != None:
             return True
@@ -77,6 +119,7 @@ class Course(Database):
         self.title = title
         self.term = term
         if self.id != None:
+            # if course_id is provided: populate object from database
             self.execute(
                 f"SELECT title, term FROM course WHERE course.id = '{self.id}'")
             self.title, self.term = self.fetchone()
@@ -85,6 +128,7 @@ class Course(Database):
         return f"Course ID: {self.id} | Course Name: {self.title} | Course Term: {self.term}"
 
     def create_course(self):
+        """Insert course into database"""
         self.execute(
             f"INSERT INTO `course` (`title`,`term`) VALUES ('{self.title}', '{self.term}')")
         self.execute(f"SELECT LAST_INSERT_ID()")
@@ -92,6 +136,12 @@ class Course(Database):
         self.id = course_id
 
     def create_folder(self, title, root_folder_id=None):
+        """Create folder and insert it into folder table
+
+        Args:
+            title (str): title of folder
+            root_folder_id (int, optional): If folder is nested under another folder. Defaults to None.
+        """
         if root_folder_id != None:
             self.execute(
                 f"INSERT INTO folder (course_id, title, root_folder_id) VALUES ('{self.course_id}', '{title}', '{root_folder_id}')")
@@ -101,6 +151,11 @@ class Course(Database):
         self.commit()
 
     def load_folders(self):
+        """Load folders in course
+
+        Returns:
+            List of folders: return folder objects
+        """
         self.execute(f"""
         SELECT folder.id, folder.course_id, folder.root_folder_id, folder.title
         FROM folder
@@ -112,22 +167,16 @@ class Course(Database):
 
     def search_text(self, string):
         self.execute(f"""
-        SELECT thread.title, post.body
-        FROM folder INNER JOIN thread ON folder.id = thread.folder_id
-        INNER JOIN post ON thread.id = post.thread_id
-        WHERE folder.course_id = '{self.id}' AND thread.title LIKE '%{string}%' OR post.body LIKE '%{string}%'
-        """)
-        return self.fetchall()
-    
-    def load_total_posts(self):
-        self.execute(
-            f"""
-            SELECT COUNT(user_id)
-            FROM user_in_course
-            WHERE course_id='{self.id}'
+            SELECT thread.*
+            FROM folder
+            INNER JOIN thread ON folder.id = thread.folder_id
+            INNER JOIN post ON thread.id = post.thread_id
+            WHERE folder.course_id = '{self.id}' AND thread.title LIKE '%{string}%' OR post.body LIKE '%{string}%'
             """)
-        return self.fetchone()
-
+        threads = self.fetchall()
+        for thread in threads:
+            print(thread)
+    
     def load_total_users(self):
         self.execute(
             f"""
@@ -137,18 +186,7 @@ class Course(Database):
             JOIN post on thread.id = post.thread_id
             WHERE folder.course_id = {self.id};
             """)
-        return self.fetchone()
-
-    def load_total_threads(self):
-        self.execute(
-            f"""
-            SELECT COUNT(post.id)
-            FROM folder
-            JOIN thread on folder.id = thread.folder_id
-            JOIN post on thread.id = post.thread_id
-            WHERE folder.course_id = '{self.id}';
-            """)
-        return self.fetchone()
+        return self.fetchone()[0]
 
     def load_total_threads(self):
         self.execute(
@@ -158,7 +196,18 @@ class Course(Database):
             JOIN thread on folder.id = thread.folder_id
             WHERE course_id={self.id};
             """)
-        return self.fetchone()
+        return self.fetchone()[0]
+    
+    def load_total_posts(self):
+        self.execute(
+            f"""
+            SELECT COUNT(post.id)
+            FROM folder
+            JOIN thread on folder.id = thread.folder_id
+            JOIN post on thread.id = post.thread_id
+            WHERE folder.course_id = '{self.id}';
+            """)
+        return self.fetchone()[0]
 
     def load_total_instructor_responses(self):
         pass
@@ -230,6 +279,12 @@ class Thread(Database):
         posts = self.fetchall()
         return [Post(post[0], post[1], post[2], post[3], post[4], post[5], post[6]) for post in posts]
 
+    def read_thread(self, user):
+        self.execute(f"""
+        INSERT INTO user_reads_thread (user_id, thread_id) VALUES ('{user}', {self.id})
+        """)
+        self.commit()
+
     def __str__(self):
         return f"Thread ID: {self.id} | Folder ID: {self.folder_id} | User ID: {self.user_id} | Title: {self.title}"
 
@@ -249,6 +304,11 @@ class Post(Database):
                 f"SELECT thread_id, root_post_id, user_id, body, anonymous_post, created_at FROM post WHERE post.id = '{self.id}'")
             self.thread_id, self.root_post_id, self.user_id, self.body, self.anonymous_post, self.created_at = self.fetchone()
         
-
+    def likes_post(self, user):
+        self.execute(f"""
+        INSERT INTO user_likes_post (user_id, post_id) VALUES ('{user}', {self.id})
+        """)
+        self.commit()
+        
     def __str__(self):
         return f"Post ID: {self.id} | Thread ID: {self.thread_id} | Root Post ID: {self.root_post_id} | User ID: {self.user_id} | Body: {self.body} | Anonymous Post: {self.anonymous_post} | Create Time: {self.created_at}"
