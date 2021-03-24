@@ -6,7 +6,11 @@ from classes.post import Post
 
 def start():
     while True:
-        main_menu()
+        print(' — — — — MENU — — — -')
+        print(' 1. Register')
+        print(' 2. Login')
+        print(' 3. Exit') # This will also drop the database
+        print(' — — — — — — — — — — \n')
         decision = input('Choose one option: ')
         if decision == '1':
             register_user()
@@ -18,17 +22,9 @@ def start():
                 if user.validate_user() == True:
                     login_user(user)
                 else:
-                    start()
+                    print("Invalid login credentials \n")
         elif decision == '3':
             break
-
-
-def main_menu():
-    print(' — — — — MENU — — — -')
-    print(' 1. Register')
-    print(' 2. Login')
-    print(' 3. Logout')
-    print(' — — — — — — — — — — \n')
 
 
 def register_user():
@@ -57,13 +53,20 @@ def login_user(user):
         decision = input("Make a choice: \n")
         if decision == '1':
             course_id = int(input("Course id of course: "))
-            with Course(id=course_id) as course:
-                course_view(course, user)
+            try:
+                # Check if entered course id raises any errors
+                with Course(id=course_id) as course:
+                    course_view(course, user)
+            except:
+                print("The course you entered does not exist.\n")
         elif decision == '2':
             for course in user.load_all_courses():
                 print(f"{course} \n")
             course_id = int(input("Course id of course: "))
-            user.add_user_to_course(course_id)
+            try:
+                user.add_user_to_course(course_id)
+            except:
+                print("The course you entered does not exist.\n")
         elif decision == '3':
             course_title = input("Name of course: ")
             course_term = input("Term of course: ")
@@ -88,16 +91,18 @@ def course_view(course, user):
             print('--- ADMIN Panel ---')
             print('3. Create folder')
             print('4. View Statistics')
-        print(' Press "e" to go back')
+            print('5. Go back to last page')
         decision = input("Make a choice: ")
         if decision == '1':
             folder_id = int(input("folder id of folder: "))
-            with Folder(id=folder_id) as folder:
-                folder_view(folder, user)
+            try:
+                with Folder(id=folder_id) as folder:
+                    folder_view(folder, user)
+            except:
+                print("The folder you entered does not exist. \n")
         elif decision == '2':
             text = input("What to search: ")
             print(course.search_text(text))
-            pass
         elif decision == '3' and user.is_admin(course):
             folder_title = input("Name of folder: ")
             root_folder = int(input("Root folder ID: "))
@@ -127,9 +132,12 @@ def folder_view(folder, user):
         decision = input("Make a choice: ")
         if decision == '1':
             thread_id = int(input("Thread id of thread: "))
-            with Thread(id=thread_id) as thread:
-                thread.read_thread(user.email)
-                thread_view(thread, user)
+            try:
+                with Thread(id=thread_id) as thread:
+                    thread.read_thread(user.email)
+                    thread_view(thread, user)
+            except:
+                print("The thread you entered does not exist. \n")
         elif decision == '2':
             thread_title = input("Title of new thread")
             thread_tag = input("Tag of new thread")

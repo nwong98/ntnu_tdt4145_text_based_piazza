@@ -12,10 +12,6 @@ class User(Database):
         self.email = email
         self.password = password
         self.full_name = full_name
-        # if self.email != None:
-        #     self.execute(
-        #         f"SELECT pass, full_name FROM user WHERE user.email = '{self.email}'")
-        #     self.password, self.full_name = self.fetchone()
 
     def create_user(self):
         """Method to insert user into database"""

@@ -153,3 +153,16 @@ class Course(Database):
             """
         )
         return self.fetchone()[0]
+    
+    # def validate_course(self):
+    #     """Check if course_id matches any tuples in database
+
+    #     Returns:
+    #         Boolean: if course is in database
+    #     """
+    #     self.execute(
+    #         f"SELECT * FROM course WHERE course.id = {self.id}")
+    #     if self.fetchone() != None:
+    #         return True
+    #     else:
+    #         return False
