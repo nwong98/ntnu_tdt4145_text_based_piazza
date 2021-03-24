@@ -38,10 +38,10 @@ class Course(Database):
         """
         if root_folder_id != None:
             self.execute(
-                f"INSERT INTO folder (course_id, title, root_folder_id) VALUES ('{self.course_id}', '{title}', '{root_folder_id}')")
+                f"INSERT INTO folder (course_id, title, root_folder_id) VALUES ({self.id}, '{title}', {root_folder_id})")
         else:
             self.execute(
-                f"INSERT INTO folder (course_id, title) VALUES ('{self.course_id}', '{title}')")
+                f"INSERT INTO folder (course_id, title) VALUES ({self.id}, '{title}')")
         self.commit()
 
     def load_folders(self):
@@ -130,7 +130,7 @@ class Course(Database):
             JOIN thread ON folder.id = thread.folder_id
             JOIN post ON thread.id = post.thread_id
             JOIN user_in_course ON post.user_id = user_in_course.user_id
-            WHERE course.id = {self.id} AND user_in_course.user_type = 'Admin';
+            WHERE course.id = {self.id} AND user_in_course.user_type = 'Admin' OR user_in_course.user_type= 'Instructor';
             """
         )
         return self.fetchone()[0]
@@ -152,17 +152,4 @@ class Course(Database):
             WHERE course.id = {self.id} AND user_in_course.user_type = 'Student';
             """
         )
-        return self.fetchone()[0]
-    
-    # def validate_course(self):
-    #     """Check if course_id matches any tuples in database
-
-    #     Returns:
-    #         Boolean: if course is in database
-    #     """
-    #     self.execute(
-    #         f"SELECT * FROM course WHERE course.id = {self.id}")
-    #     if self.fetchone() != None:
-    #         return True
-    #     else:
-    #         return False
+        return self.fetchone()[0] 

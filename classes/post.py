@@ -30,6 +30,28 @@ class Post(Database):
         INSERT INTO user_likes_post (user_id, post_id) VALUES ('{user_id}', {self.id})
         """)
         self.commit()
+    
+    @property
+    def user_role(self):
+        self.execute(f"""
+            SELECT user_in_course.user_type
+            FROM course
+            JOIN folder ON course.id = folder.course_id
+            JOIN thread ON folder.id = thread.folder_id 
+            JOIN post ON thread.id = post.thread_id
+            JOIN user_in_course ON post.user_id = user_in_course.user_id
+            WHERE post.id = {self.id};
+        """)
+        return self.fetchone()[0]
+    
+    @property
+    def post_likes(self):
+        self.execute(f"""
+            SELECT COUNT(*)
+            FROM user_likes_post
+            WHERE user_likes_post.post_id = {self.id};
+        """)
+        return self.fetchone()[0]
         
     def __str__(self):
         """makes it possile to directly print post
@@ -37,4 +59,7 @@ class Post(Database):
         Returns:
             str: nicely prints a post
         """
-        return f"Post ID: {self.id} | Thread ID: {self.thread_id} | Root Post ID: {self.root_post_id} | User ID: {self.user_id} | Body: {self.body} | Anonymous Post: {self.anonymous_post} | Create Time: {self.created_at}"
+        if self.anonymous_post == 1:
+            return f"Post ID: {self.id} | Thread ID: {self.thread_id} | Root Post ID: {self.root_post_id} | User ID: Anonymous | Body: {self.body} | Create Time: {self.created_at} | {self.user_role} | Likes: {self.post_likes}"
+        return f"Post ID: {self.id} | Thread ID: {self.thread_id} | Root Post ID: {self.root_post_id} | User ID: {self.user_id} | Body: {self.body} | Create Time: {self.created_at} | {self.user_role} | Likes: {self.post_likes}"
+        

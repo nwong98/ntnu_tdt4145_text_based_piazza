@@ -128,6 +128,7 @@ INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (3, 'kai@test.no',
 INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (4, 'preben@test.no', 'Some qa', 'lecture');
 
 -- insert posts
+INSERT INTO db.post (thread_id, user_id, body, anonymous_post) VALUES (1, 'nicolas@test.no', 'This is some dummy text.', 1);
 INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 'nicolas@test.no', 'This is some dummy text.');
 INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 'kai@test.no', 'This is some dummy text.');
 INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 'marcus@test.no', 'This is some dummy text.');

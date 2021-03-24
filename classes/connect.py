@@ -10,12 +10,16 @@ class Database:
         self._cursor = self._conn.cursor()
 
     def __enter__(self):
+        """__enter__ and __exit__ methods
+        - Used with Python to handle with statements in code.
+        Connection to database will automatically close after each with statement.
+        """
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
-    @property
+    @property #decorator in Python that allows us to use function as object property
     def connection(self):
         return self._conn
 
@@ -46,6 +50,11 @@ class Database:
         return self.fetchall()
 
     def execute_script(self, filename):
+        """Execute multiple sql commands sequently
+
+        Args:
+            filename (txt): path to script to be excecuted
+        """
         with open(filename, 'r') as f:
             sql_file = f.read()
         sql_commands = sql_file.split(';')
