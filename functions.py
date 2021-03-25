@@ -72,7 +72,7 @@ def login_user(user):
         print(' 4. Previous page')
         print(' — — — — — — — — — — ')
         decision = input("Choose an option: ")
-        print(' — — — — — — — — — — \n')
+        print(' — — — — — — — — — —')
         if decision == '1':
             course_id = int(input("Course id of course: "))
                 # Check if entered course id raises any errors
@@ -127,7 +127,7 @@ def course_view(course, user):
         print('5. Previous page')
         print(' — — — — — — — — — — ')
         decision = input("Choose an option: ")
-        print(' — — — — — — — — — — ')
+        print(' — — — — — — — — — — \n')
         if decision == '1':
             try:
                 folder_id = int(input("folder id of folder: "))
@@ -137,7 +137,9 @@ def course_view(course, user):
                 print("The folder does not exist.")
         elif decision == '2':
             text = input("What to search: ")
+            print(f'--- SEARCH RESULTS ---')
             print(course.search_text(text))
+            print(f'--- SEARCH RESULTS ---')
         elif decision == '3' and user.is_admin(course.id):
             folder_title = input("Name of folder: ")
             root_folder = int(input("Root folder ID: "))
@@ -149,6 +151,7 @@ def course_view(course, user):
             print(f"Total posts in course: {course.load_total_posts()} posts")
             print(f"    -Total posts by instructors: {course.load_total_instructor_responses()} instructor responses")
             print(f"    -Total posts by students: {course.load_total_student_responses()} student responses")
+            course.load_course_stats()
         elif decision == '5':
             break
 
@@ -170,7 +173,9 @@ def folder_view(folder, user):
         print(' 1. Acces Thread')
         print(' 2. Create Thread')
         print(' 3. Previous page')
-        decision = input("Choose an option: \n")
+        print(' — — — — — — — — — — ')
+        decision = input("Choose an option: ")
+        print(' — — — — — — — — — — \n')
         if decision == '1':
             try:
                 # check if thread us accessible
@@ -210,7 +215,9 @@ def thread_view(thread, user):
         print(' 2. Create post')
         print(' 3. Like post')
         print(' 4. Previous page')
+        print(' — — — — — — — — — — ')
         decision = input("Make a choice: ")
+        print(' — — — — — — — — — — \n')
         if decision == '1':
             root_post_id = int(input("Id of post you want to reply to: "))
             post_body = input("Reply message: ")

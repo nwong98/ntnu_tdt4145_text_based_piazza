@@ -61,15 +61,15 @@ class Course(Database):
 
     def search_text(self, string):
         self.execute(f"""
-            SELECT thread.*
+            SELECT thread.id, thread.title, post.id, post.body
             FROM folder
             INNER JOIN thread ON folder.id = thread.folder_id
             INNER JOIN post ON thread.id = post.thread_id
             WHERE folder.course_id = '{self.id}' AND thread.title LIKE '%{string}%' OR post.body LIKE '%{string}%'
             """)
-        threads = self.fetchall()
-        for thread in threads:
-            print(thread)
+        responses = self.fetchall()
+        for response in responses:
+            print(f"Thread id: {response[0]} | Thread title: {response[1]} | Post id: {response[2]} | Post body: {response[3]}")
     
     def load_total_users(self):
         """load user statistics (number of users in course)
@@ -153,3 +153,28 @@ class Course(Database):
             """
         )
         return self.fetchone()[0] 
+
+    def load_course_stats(self):
+        self.execute(f"""
+            SELECT user.email, posts_created, posts_read
+            FROM user
+            JOIN (
+            SELECT *
+            FROM user_in_course
+            WHERE course_id = {self.id}
+            ) c ON user.email = c.user_id
+            LEFT JOIN (
+            SELECT user_id, COUNT(id) AS posts_created
+            FROM post
+            GROUP BY user_id) p ON c.user_id = p.user_id
+            LEFT JOIN (
+            SELECT user_id, COUNT(thread_id) AS posts_read
+            FROM user_reads_thread
+            GROUP BY user_id) r ON p.user_id = r.user_id
+            ORDER BY posts_read DESC;
+        """)
+        stats = self.fetchall()
+        print("\n- - - - USER STATS - - - -")
+        for stat in stats:
+            print(f"User: {stat[0]} | Number of posts created: {stat[1]} | Number of posts read: {stat[2]}")
+        print("- - - - USER STATS - - - -\n")

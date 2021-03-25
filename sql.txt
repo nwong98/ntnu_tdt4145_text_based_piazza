@@ -109,38 +109,107 @@ INSERT INTO db.user(email, pass, full_name) VALUES ('borg@test.no', 'pass', 'Bor
 INSERT INTO db.user(email, pass, full_name) VALUES ('preben@test.no', 'pass', 'Preben');
 INSERT INTO db.user(email, pass, full_name) VALUES ('alex@test.no', 'pass', 'Alex');
 INSERT INTO db.user(email, pass, full_name) VALUES ('serg@test.no', 'pass', 'Serv');
+INSERT INTO db.user(email, pass, full_name) VALUES ('sander@test.no', 'pass', 'Serv');
+INSERT INTO db.user(email, pass, full_name) VALUES ('rolf@test.no', 'pass', 'Serv');
+INSERT INTO db.user(email, pass, full_name) VALUES ('roger@test.no', 'pass', 'Roger Midtstraum');
+INSERT INTO db.user(email, pass, full_name) VALUES ('svein@test.no', 'pass', 'Svein Erik Bratsberg');
 
 -- insert test course
-INSERT INTO db.course (title, term) VALUES ('testcourse', 'høst2918');
-INSERT INTO db.course (title, term) VALUES ('newcourse', 'våren2021');
-
--- insert test folder
-INSERT INTO db.folder(course_id, title) VALUES (1, 'exam');
-INSERT INTO db.folder(course_id, title) VALUES (1, 'tasks');
-INSERT INTO db.folder(course_id, title) VALUES (2, 'øving');
-INSERT INTO db.folder(course_id, title) VALUES (2, 'qa');
-INSERT INTO db.folder(course_id, title, root_folder_id) VALUES (1, 'exam2020', 1);
-
--- insert threads
-INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (1, 'nicolas@test.no', 'Exam date?', 'question');
-INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (2, 'marcus@test.no', 'What task?', 'question');
-INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (3, 'kai@test.no', 'When is due date', 'announcement');
-INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES (4, 'preben@test.no', 'Some qa', 'lecture');
-
--- insert posts
-INSERT INTO db.post (thread_id, user_id, body, anonymous_post) VALUES (1, 'nicolas@test.no', 'This is some dummy text.', 1);
-INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 'nicolas@test.no', 'This is some dummy text.');
-INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 'kai@test.no', 'This is some dummy text.');
-INSERT INTO db.post (thread_id, user_id, body) VALUES (1, 'marcus@test.no', 'This is some dummy text.');
-INSERT INTO db.post (thread_id, user_id, body) VALUES (2, 'preben@test.no', 'This is some dummy text.');
-INSERT INTO db.post (thread_id, user_id, body) VALUES (2, 'serg@test.no', 'This is some dummy text.');
+INSERT INTO db.course (title, term) VALUES ('TDT4145', 'V2020'), ('TDT4140', 'V2021'), ('TMA4100', 'H2021'), ('TMA4105', 'H2021');
 
 -- insert participates_in_course
-INSERT INTO db.user_in_course(user_id, course_id, user_type) VALUES ('nicolas@test.no',1, 'Admin');
-INSERT INTO db.user_in_course(user_id, course_id) VALUES ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',1), ('preben@test.no',1), ('alex@test.no',1), ('serg@test.no',1);
+INSERT INTO db.user_in_course(user_id, course_id, user_type) VALUES
+    ('nicolas@test.no',1, 'Admin'),
+    ('preben@test.no',2, 'Admin'),
+    ('roger@test.no',3, 'Admin');
 
--- insert into user_likes_post
-INSERT INTO db.user_likes_post(user_id, post_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',2), ('preben@test.no',2), ('alex@test.no',3), ('serg@test.no',4);
+INSERT INTO db.user_in_course(user_id, course_id) VALUES
+    ('marcus@test.no',1),
+    ('kai@test.no',1),
+    ('borg@test.no',1),
+    ('alex@test.no',2),
+    ('serg@test.no',2),
+    ('sander@test.no',2),
+    ('rolf@test.no',3),
+    ('svein@test.no',3);
+
+-- insert test folder
+INSERT INTO db.folder(course_id, title) VALUES (1, 'exam_datamod'), (1, 'tasks_datamod'), (1, 'øving_datamod'), (1, 'qa_datamod');
+INSERT INTO db.folder(course_id, title) VALUES (2, 'exam_pu'), (2, 'tasks_pu'), (2, 'øving_pu'), (2, 'qa_pu');
+INSERT INTO db.folder(course_id, title) VALUES (3, 'exam_m1'), (3, 'tasks_m1'), (3, 'øving_m1'), (3, 'qa_m1');
+INSERT INTO db.folder(course_id, title) VALUES (4, 'exam_m3'), (4, 'tasks_m3'), (4, 'øving_m3'), (4, 'qa_m3');
+-- INSERT INTO db.folder(course_id, title, root_folder_id) VALUES (1, 'exam2020', 1);
+
+-- insert threads
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES 
+    (1, 'nicolas@test.no', 'Exam date?', 'question'),
+    (2, 'marcus@test.no', 'What task?', 'question'),
+    (3, 'kai@test.no', 'When is due date', 'announcement'),
+    (4, 'borg@test.no', 'Some qa', 'lecture'),
+    (1, 'nicolas@test.no', '2Exam date?', 'question'),
+    (2, 'marcus@test.no', '2What task?', 'question'),
+    (3, 'kai@test.no', '2When is due date', 'announcement'),
+    (4, 'borg@test.no', '2Some qa', 'lecture'),
+    (1, 'nicolas@test.no', '3Exam date?', 'question'),
+    (2, 'marcus@test.no', '3What task?', 'question'),
+    (3, 'kai@test.no', '3When is due date', 'announcement'),
+    (4, 'borg@test.no', '3Some qa', 'lecture');
+
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES 
+    (5, 'preben@test.no', 'Exam date?', 'question'),
+    (6, 'alex@test.no', 'What task?', 'question'),
+    (7, 'serg@test.no', 'When is due date', 'announcement'),
+    (8, 'sander@test.no', 'Some qa', 'lecture'),
+    (5, 'preben@test.no', '2Exam date?', 'question'),
+    (6, 'alex@test.no', '2What task?', 'question'),
+    (7, 'serg@test.no', '2When is due date', 'announcement'),
+    (8, 'sander@test.no', '2Some qa', 'lecture'),
+    (5, 'preben@test.no', '3Exam date?', 'question'),
+    (6, 'alex@test.no', 'What task?', 'question'),
+    (7, 'serg@test.no', '3When is due date', 'announcement'),
+    (8, 'sander@test.no', '3Some qa', 'lecture');
+
+INSERT INTO db.thread (folder_id, user_id, title, tag) VALUES 
+    (9, 'rolf@test.no', 'Exam date?', 'question'),
+    (10, 'roger@test.no', 'What task?', 'question'),
+    (11, 'svein@test.no', 'When is due date', 'announcement'),
+    (12, 'roger@test.no', 'Some qa', 'lecture'),
+    (9, 'rolf@test.no', '2Exam date?', 'question'),
+    (10, 'roger@test.no', '2What task?', 'question'),
+    (11, 'svein@test.no', '2When is due date', 'announcement'),
+    (12, 'roger@test.no', '2Some qa', 'lecture'),
+    (9, 'rolf@test.no', '3Exam date?', 'question'),
+    (10, 'roger@test.no', '3What task?', 'question'),
+    (11, 'svein@test.no', '3When is due date', 'announcement'),
+    (12, 'roger@test.no', '3Some qa', 'lecture');
+
+-- insert posts
+-- INSERT INTO db.post (thread_id, user_id, body, anonymous_post) VALUES (1, 'nicolas@test.no', 'This is some dummy text.', 1);
+INSERT INTO db.post (thread_id, user_id, body) VALUES 
+    (1, 'nicolas@test.no', 'This is some dummy text.'),
+    (1, 'marcus@test.no', 'This is some dummy text.'),
+    (1, 'kai@test.no', 'This is some dummy text.'),
+    (1, 'borg@test.no', 'This is some dummy text.');
+
+INSERT INTO db.post (thread_id, user_id, body) VALUES 
+    (13, 'preben@test.no', 'This is some dummy text.'),
+    (13, 'alex@test.no', 'This is some dummy text.'),
+    (13, 'serg@test.no', 'This is some dummy text.'),
+    (13, 'sander@test.no', 'This is some dummy text.');
+
+INSERT INTO db.post (thread_id, user_id, body) VALUES 
+    (25, 'rolf@test.no', 'This is some dummy text.'),
+    (25, 'roger@test.no', 'This is some dummy text.'),
+    (25, 'svein@test.no', 'This is some dummy text.'),
+    (25, 'roger@test.no', 'This is some dummy text.');
 
 -- insert into has_read
-INSERT INTO db.user_read_thread(user_id, thread_id) VALUES ('nicolas@test.no',1), ('marcus@test.no',1), ('kai@test.no',1), ('borg@test.no',2), ('preben@test.no',2), ('alex@test.no',3), ('serg@test.no',4);
+INSERT INTO db.user_reads_thread(user_id, thread_id) VALUES
+    ('nicolas@test.no',1),
+    ('marcus@test.no',1),
+    ('kai@test.no',2),
+    ('borg@test.no',2),
+    ('preben@test.no',13),
+    ('alex@test.no',13),
+    ('serg@test.no',14),
+    ('sander@test.no',14);
